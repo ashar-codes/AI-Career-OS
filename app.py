@@ -8,74 +8,145 @@ st.set_page_config(layout="wide")
 
 st.title("🚀 AI Career OS")
 
-menu = st.sidebar.selectbox("Menu", ["Login", "Resume Builder", "ATS Analyzer", "Winning Resume Lab"])
+# -------------------------
+# SESSION STATE
+# -------------------------
+if "user" not in st.session_state:
+    st.session_state.user = None
 
+menu = st.sidebar.selectbox(
+    "Menu",
+    ["Login", "Resume Builder", "ATS Analyzer", "Winning Resume Lab"]
+)
+
+# -------------------------
+# LOGIN PAGE
+# -------------------------
 if menu == "Login":
     st.subheader("Login or Sign Up")
 
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
 
+    # LOGIN
     if st.button("Login"):
-        sign_in(email, password)
-        st.success("Logged in!")
+        try:
+            response = sign_in(email, password)
 
+            if response and response.user:
+                st.session_state.user = response.user
+                st.success("Logged in successfully!")
+            else:
+                st.error("Invalid email or password.")
+
+        except Exception as e:
+            st.error(f"Login error: {e}")
+
+    # SIGNUP
     if st.button("Sign Up"):
-        sign_up(email, password)
-        st.success("Account created!")
+        try:
+            response = sign_up(email, password)
 
+            if response and response.user:
+                st.success("Account created! Check your email if verification is enabled.")
+            else:
+                st.error("Signup failed.")
+
+        except Exception as e:
+            st.error(f"Signup error: {e}")
+
+    # GOOGLE LOGIN
     if st.button("Login with Google"):
-        sign_in_with_google()
+        try:
+            sign_in_with_google()
+        except Exception as e:
+            st.error(f"Google login error: {e}")
 
-
+# -------------------------
+# RESUME BUILDER
+# -------------------------
 elif menu == "Resume Builder":
-    st.subheader("Generate Resume")
 
-    name = st.text_input("Full Name")
-    education = st.text_area("Education")
-    experience = st.text_area("Experience")
-    skills = st.text_area("Skills")
-    target_role = st.text_input("Target Role")
-    job_description = st.text_area("Job Description")
+    if not st.session_state.user:
+        st.warning("Please login first.")
+    else:
+        st.subheader("Generate Resume")
 
-    if st.button("Generate"):
-        data = {
-            "name": name,
-            "email": "",
-            "education": education,
-            "experience": experience,
-            "skills": skills,
-            "target_role": target_role,
-            "job_description": job_description
-        }
+        name = st.text_input("Full Name")
+        education = st.text_area("Education")
+        experience = st.text_area("Experience")
+        skills = st.text_area("Skills")
+        target_role = st.text_input("Target Role")
+        job_description = st.text_area("Job Description")
 
-        resume = generate_resume(data)
-        st.text_area("Generated Resume", resume, height=400)
+        if st.button("Generate"):
+            try:
+                data = {
+                    "name": name,
+                    "email": st.session_state.user.email,
+                    "education": education,
+                    "experience": experience,
+                    "skills": skills,
+                    "target_role": target_role,
+                    "job_description": job_description
+                }
 
+                resume = generate_resume(data)
+                st.text_area("Generated Resume", resume, height=400)
+
+            except Exception as e:
+                st.error(f"Resume generation error: {e}")
+
+# -------------------------
+# ATS ANALYZER
+# -------------------------
 elif menu == "ATS Analyzer":
-    st.subheader("Upload Resume for Analysis")
 
-    file = st.file_uploader("Upload PDF", type=["pdf"])
+    if not st.session_state.user:
+        st.warning("Please login first.")
+    else:
+        st.subheader("Upload Resume for Analysis")
 
-    if file:
-        with pdfplumber.open(file) as pdf:
-            text = ""
-            for page in pdf.pages:
-                text += page.extract_text()
+        file = st.file_uploader("Upload PDF", type=["pdf"])
 
-        result = analyze_resume(text)
-        st.write(result)
+        if file:
+            try:
+                with pdfplumber.open(file) as pdf:
+                    text = ""
+                    for page in pdf.pages:
+                        extracted = page.extract_text()
+                        if extracted:
+                            text += extracted
 
+                result = analyze_resume(text)
+                st.write(result)
+
+            except Exception as e:
+                st.error(f"Analysis error: {e}")
+
+# -------------------------
+# WINNING RESUME LAB
+# -------------------------
 elif menu == "Winning Resume Lab":
-    st.subheader("Upload Winning Resume")
 
-    file = st.file_uploader("Upload Winning Resume PDF", type=["pdf"])
+    if not st.session_state.user:
+        st.warning("Please login first.")
+    else:
+        st.subheader("Upload Winning Resume")
 
-    if file:
-        with pdfplumber.open(file) as pdf:
-            text = ""
-            for page in pdf.pages:
-                text += page.extract_text()
+        file = st.file_uploader("Upload Winning Resume PDF", type=["pdf"])
 
-        result = analyze_winning_resume(text)
-        st.write(result)
+        if file:
+            try:
+                with pdfplumber.open(file) as pdf:
+                    text = ""
+                    for page in pdf.pages:
+                        extracted = page.extract_text()
+                        if extracted:
+                            text += extracted
+
+                result = analyze_winning_resume(text)
+                st.write(result)
+
+            except Exception as e:
+                st.error(f"Winning resume analysis error: {e}")
