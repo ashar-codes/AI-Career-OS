@@ -3,6 +3,9 @@ from auth import sign_in, sign_up, sign_in_with_google
 from ai_engine import generate_resume, analyze_resume, analyze_winning_resume
 from database import save_resume, get_user_resumes
 import pdfplumber
+import os
+st.write("Groq Key Loaded:", os.getenv("GROQ_API_KEY") is not None)
+
 
 st.set_page_config(layout="wide")
 
