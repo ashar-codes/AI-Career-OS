@@ -4,7 +4,9 @@ from ai_engine import generate_resume, analyze_resume, analyze_winning_resume
 from database import save_resume, get_user_resumes
 import pdfplumber
 import os
-st.write("Groq Key Loaded:", os.getenv("GROQ_API_KEY") is not None)
+key = os.getenv("GROQ_API_KEY")
+st.write("First 5 chars:", key[:5])
+
 
 
 st.set_page_config(layout="wide")
