@@ -187,52 +187,68 @@ elif menu == "Resume Builder":
             # DESIGN OPTIONS
             # -------------------------
             st.divider()
-            st.subheader("🎨 Design Options")
+st.subheader("🎨 Design Options")
 
-            template = st.selectbox(
-                "Template",
-                [
-                    "Corporate Minimal",
-                    "Modern Two Column",
-                    "Executive Elegant",
-                    "Creative Accent"
-                ],
-                index=0
-            )
+template = st.selectbox(
+    "Template",
+    ["Corporate Minimal", "Modern Two Column", "Executive Elegant", "Creative Accent"],
+    index=0,
+    key="template_select"
+)
 
-            font_choice = st.selectbox(
-                "Font",
-                [
-                    "Helvetica",
-                    "Arial",
-                    "Georgia",
-                    "Times New Roman"
-                ],
-                index=0
-            )
+font_choice = st.selectbox(
+    "Font",
+    ["Helvetica", "Arial", "Georgia", "Times New Roman"],
+    index=0,
+    key="font_select"
+)
 
-            preset_colors = {
-                "Corporate Blue": "#1f4e79",
-                "Charcoal": "#333333",
-                "Emerald": "#0f5132",
-                "Burgundy": "#6f1d1b",
-                "Navy": "#1a237e"
-            }
+preset_colors = {
+    "Corporate Blue": "#1f4e79",
+    "Charcoal": "#333333",
+    "Emerald": "#0f5132",
+    "Burgundy": "#6f1d1b",
+    "Navy": "#1a237e"
+}
 
-            preset = st.selectbox(
-                "Preset Color",
-                list(preset_colors.keys())
-            )
+preset = st.selectbox(
+    "Preset Color",
+    list(preset_colors.keys()),
+    key="preset_color_select"
+)
 
-            accent_color = st.color_picker(
-                "Custom Accent Color",
-                preset_colors[preset]
-            )
+accent_color = st.color_picker(
+    "Custom Accent Color",
+    preset_colors[preset],
+    key="color_picker"
+)
 
-            photo = st.file_uploader(
-                "Upload Profile Picture (Optional)",
-                type=["jpg", "png"]
-            )
+photo = st.file_uploader(
+    "Upload Profile Picture (Optional)",
+    type=["jpg", "png"],
+    key="photo_upload"
+)
+
+st.divider()
+
+if st.button("📄 Generate PDF", key="generate_pdf_btn"):
+
+    pdf_path = generate_pdf(
+        resume,
+        template,
+        font_choice,
+        accent_color,
+        photo
+    )
+
+    with open(pdf_path, "rb") as f:
+        st.download_button(
+            label="⬇ Download Resume PDF",
+            data=f,
+            file_name="resume.pdf",
+            mime="application/pdf",
+            key="download_pdf_btn"
+        )
 
             # -------------------------
             # PDF GENERATION
