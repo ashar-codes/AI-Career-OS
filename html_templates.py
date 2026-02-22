@@ -185,53 +185,54 @@ def bold_corporate_template(resume, accent_color, photo):
             box-shadow: 0 0 8px {accent_color};
         }}
 
-        /* ================= TIMELINE ================= */
-        .timeline {{
-            position: relative;
-            padding-left: 45px;
-        }}
+      /* ================= TIMELINE ================= */
 
-        .timeline::before {{
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: {accent_color};
-            opacity: 0.5;
-        }}
+.timeline {
+    position: relative;
+    padding-left: 60px; /* more breathing room */
+}
 
-        .timeline-item {{
-            position: relative;
-            margin-bottom: 40px;
-        }}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 28px;              /* line center */
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: {accent_color};
+    opacity: 0.5;
+}
 
-        .timeline-dot {{
-            position: absolute;
-            left: 15px;   /* perfectly centered */
-            top: 8px;
-            width: 10px;
-            height: 10px;
-            background: {accent_color};
-            border-radius: 50%;
-            box-shadow: 0 0 6px {accent_color};
-        }}
+.timeline-item {
+    position: relative;
+    margin-bottom: 45px;
+}
 
-        .job-title {{
-            font-weight: 600;
-            font-size: 16px;
-        }}
+.timeline-dot {
+    position: absolute;
+    left: 23px;              /* 28 - (10/2) = perfectly centered */
+    top: 10px;
+    width: 10px;
+    height: 10px;
+    background: {accent_color};
+    border-radius: 50%;
+    box-shadow: 0 0 6px {accent_color};
+}
 
-        .company {{
-            color: {accent_color};
-            font-weight: 500;
-        }}
+.timeline-content {
+    margin-left: 0;          /* reset */
+}
 
-        ul {{
-            margin-top: 10px;
-            padding-left: 18px;
-        }}
+.job-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 10px;     /* CRITICAL spacing fix */
+}
+
+ul {
+    margin-top: 0;
+    padding-left: 20px;      /* proper bullet indentation */
+}
 
         li {{
             font-size: 14px;
