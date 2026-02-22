@@ -16,9 +16,28 @@ def hex_to_rgb(hex_color):
     )
 
 
+def draw_gradient_sidebar(c, width, accent):
+    for i in range(int(PAGE_HEIGHT)):
+        ratio = i / PAGE_HEIGHT
+        dark = colors.Color(
+            accent.red * 0.6,
+            accent.green * 0.6,
+            accent.blue * 0.6
+        )
+        r = dark.red + (accent.red - dark.red) * ratio
+        g = dark.green + (accent.green - dark.green) * ratio
+        b = dark.blue + (accent.blue - dark.blue) * ratio
+        c.setStrokeColor(colors.Color(r, g, b))
+        c.line(0, i, width, i)
+
+
+def draw_icon_circle(c, x, y, radius, fill_color):
+    c.setFillColor(fill_color)
+    c.circle(x, y, radius, fill=1)
+
+
 def draw_circular_image(c, image_file, x, y, size):
     img = ImageReader(image_file)
-
     path = c.beginPath()
     path.circle(x + size/2, y + size/2, size/2)
 
@@ -32,8 +51,6 @@ def wrap_text(text, font, size, max_width, c):
     words = text.split()
     lines = []
     current = ""
-
-    c.setFont(font, size)
 
     for word in words:
         test = current + " " + word if current else word
@@ -55,76 +72,82 @@ def generate_pdf(resume, template, font_choice, accent_hex, photo):
     c = canvas.Canvas(tmp.name, pagesize=A4)
 
     accent = hex_to_rgb(accent_hex)
-
     sidebar_width = PAGE_WIDTH * 0.35
     content_x = sidebar_width + 40
     content_width = PAGE_WIDTH - sidebar_width - 80
 
-    # =============================
-    # SIDEBAR BACKGROUND
-    # =============================
-    c.setFillColor(accent)
-    c.rect(0, 0, sidebar_width, PAGE_HEIGHT, fill=1)
+    # -------------------------
+    # SIDEBAR
+    # -------------------------
+    draw_gradient_sidebar(c, sidebar_width, accent)
 
-    # =============================
-    # PHOTO
-    # =============================
+    # Photo
     if photo:
         draw_circular_image(
             c,
             photo,
-            sidebar_width/2 - 60,
-            PAGE_HEIGHT - 200,
-            120
+            sidebar_width/2 - 55,
+            PAGE_HEIGHT - 190,
+            110
         )
+        c.setStrokeColor(colors.white)
+        c.setLineWidth(3)
+        c.circle(sidebar_width/2, PAGE_HEIGHT - 135, 55)
 
-    y_sidebar = PAGE_HEIGHT - 250
-
+    y_sidebar = PAGE_HEIGHT - 260
     c.setFillColor(colors.white)
 
-    # =============================
     # CONTACT
-    # =============================
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(40, y_sidebar, "CONTACT")
-    y_sidebar -= 20
+    draw_icon_circle(c, 40, y_sidebar+5, 8, colors.white)
+    c.setFillColor(accent)
+    c.setFont("Helvetica-Bold", 8)
+    c.drawCentredString(40, y_sidebar+2, "C")
+
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(60, y_sidebar, "CONTACT")
+    y_sidebar -= 25
 
     c.setFont("Helvetica", 10)
-    contact_lines = [
-        resume.get("email", ""),
-    ]
+    c.drawString(60, y_sidebar, resume.get("email", ""))
+    y_sidebar -= 30
 
-    for line in contact_lines:
-        wrapped = wrap_text(line, "Helvetica", 10, sidebar_width - 80, c)
-        for w in wrapped:
-            c.drawString(40, y_sidebar, w)
-            y_sidebar -= 14
-
-    y_sidebar -= 20
-
-    # =============================
     # SKILLS
-    # =============================
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(40, y_sidebar, "SKILLS")
-    y_sidebar -= 20
+    draw_icon_circle(c, 40, y_sidebar+5, 8, colors.white)
+    c.setFillColor(accent)
+    c.setFont("Helvetica-Bold", 8)
+    c.drawCentredString(40, y_sidebar+2, "S")
 
-    c.setFont("Helvetica", 10)
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(60, y_sidebar, "SKILLS")
+    y_sidebar -= 25
 
     for skill in resume.get("skills", []):
-        wrapped = wrap_text(skill, "Helvetica", 10, sidebar_width - 80, c)
-        for w in wrapped:
-            c.drawString(40, y_sidebar, "• " + w)
-            y_sidebar -= 14
+        c.setFillColor(colors.white)
+        c.setFont("Helvetica", 10)
+        c.drawString(60, y_sidebar, skill)
 
-    y_sidebar -= 20
+        # Skill bar
+        c.setFillColor(colors.grey)
+        c.rect(60, y_sidebar-5, sidebar_width-100, 4, fill=1)
+        c.setFillColor(accent)
+        c.rect(60, y_sidebar-5, (sidebar_width-100)*0.7, 4, fill=1)
 
-    # =============================
+        y_sidebar -= 20
+
     # EDUCATION
-    # =============================
+    y_sidebar -= 15
+    draw_icon_circle(c, 40, y_sidebar+5, 8, colors.white)
+    c.setFillColor(accent)
+    c.setFont("Helvetica-Bold", 8)
+    c.drawCentredString(40, y_sidebar+2, "E")
+
+    c.setFillColor(colors.white)
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(40, y_sidebar, "EDUCATION")
-    y_sidebar -= 20
+    c.drawString(60, y_sidebar, "EDUCATION")
+    y_sidebar -= 25
 
     edu_lines = wrap_text(
         resume.get("education", ""),
@@ -135,30 +158,39 @@ def generate_pdf(resume, template, font_choice, accent_hex, photo):
     )
 
     for line in edu_lines:
-        c.drawString(40, y_sidebar, line)
+        c.drawString(60, y_sidebar, line)
         y_sidebar -= 14
 
-    # =============================
+    # -------------------------
     # MAIN CONTENT
-    # =============================
+    # -------------------------
     y_main = PAGE_HEIGHT - 120
 
-    # NAME
-    c.setFillColor(colors.black)
+    # Name Header Band
+    c.setFillColor(colors.darkgrey)
+    c.rect(sidebar_width, PAGE_HEIGHT - 150, PAGE_WIDTH-sidebar_width, 150, fill=1)
+
+    c.setFillColor(colors.white)
     c.setFont("Helvetica-Bold", 32)
-    c.drawString(content_x, y_main, resume.get("name", ""))
-    y_main -= 30
+    c.drawString(content_x, PAGE_HEIGHT - 80, resume.get("name", ""))
 
     # Divider
     c.setStrokeColor(accent)
     c.setLineWidth(3)
-    c.line(content_x, y_main, content_x + content_width, y_main)
-    y_main -= 30
+    c.line(content_x, PAGE_HEIGHT - 100, content_x+200, PAGE_HEIGHT - 100)
+
+    y_main = PAGE_HEIGHT - 180
+
+    # Timeline vertical line
+    c.setStrokeColor(colors.grey)
+    c.setLineWidth(1)
+    c.line(content_x-20, y_main, content_x-20, 100)
 
     # SUMMARY
+    c.setFillColor(colors.black)
     c.setFont("Helvetica-Bold", 14)
-    c.drawString(content_x, y_main, "PROFESSIONAL SUMMARY")
-    y_main -= 20
+    c.drawString(content_x, y_main, "SUMMARY")
+    y_main -= 25
 
     c.setFont("Helvetica", 10.5)
     summary_lines = wrap_text(
@@ -181,44 +213,25 @@ def generate_pdf(resume, template, font_choice, accent_hex, photo):
     y_main -= 20
 
     for exp in resume.get("experience", []):
+        # Timeline dot
+        c.setFillColor(accent)
+        c.circle(content_x-20, y_main+5, 4, fill=1)
+
+        c.setFillColor(colors.black)
         c.setFont("Helvetica-Bold", 11)
-        title_line = f"{exp.get('title','')} | {exp.get('company','')} ({exp.get('duration','')})"
+        title_line = f"{exp.get('title','')} | {exp.get('company','')}"
         c.drawString(content_x, y_main, title_line)
         y_main -= 16
 
         c.setFont("Helvetica", 10)
-
         for bullet in exp.get("bullets", []):
-            bullet_lines = wrap_text(bullet, "Helvetica", 10, content_width - 15, c)
-            for i, bl in enumerate(bullet_lines):
+            lines = wrap_text(bullet, "Helvetica", 10, content_width-10, c)
+            for i, l in enumerate(lines):
                 prefix = "• " if i == 0 else "   "
-                c.drawString(content_x, y_main, prefix + bl)
+                c.drawString(content_x, y_main, prefix+l)
                 y_main -= 14
 
-        y_main -= 10
-
-    # PROJECTS
-    if resume.get("projects"):
-        y_main -= 10
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(content_x, y_main, "PROJECTS")
-        y_main -= 20
-
-        for proj in resume.get("projects", []):
-            c.setFont("Helvetica-Bold", 11)
-            c.drawString(content_x, y_main, proj.get("title", ""))
-            y_main -= 16
-
-            c.setFont("Helvetica", 10)
-
-            for bullet in proj.get("bullets", []):
-                bullet_lines = wrap_text(bullet, "Helvetica", 10, content_width - 15, c)
-                for i, bl in enumerate(bullet_lines):
-                    prefix = "• " if i == 0 else "   "
-                    c.drawString(content_x, y_main, prefix + bl)
-                    y_main -= 14
-
-            y_main -= 10
+        y_main -= 15
 
     c.save()
     return tmp.name
