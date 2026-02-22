@@ -1,7 +1,7 @@
 def bold_corporate_template(resume, accent_color):
 
     skills_html = ""
-    for skill in resume.get("skills", [])[:6]:
+    for skill in resume.get("skills", [])[:8]:
         skills_html += f"""
         <div class="skill">
             <div class="skill-name">{skill}</div>
@@ -16,7 +16,7 @@ def bold_corporate_template(resume, accent_color):
         bullets = "".join([f"<li>{b}</li>" for b in exp.get("bullets", [])])
         experience_html += f"""
         <div class="experience-item">
-            <h4>{exp.get("title","")} | {exp.get("company","")}</h4>
+            <div class="job-title">{exp.get("title","")} <span class="company">| {exp.get("company","")}</span></div>
             <ul>{bullets}</ul>
         </div>
         """
@@ -25,89 +25,169 @@ def bold_corporate_template(resume, accent_color):
     <html>
     <head>
     <style>
-        body {{
-            font-family: Arial, sans-serif;
+
+        @page {{
+            size: A4;
             margin: 0;
-            padding: 0;
         }}
 
+        body {{
+            margin: 0;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }}
+
+        .page {{
+            width: 210mm;
+            min-height: 297mm;
+        }}
+
+        /* HEADER */
         .header {{
-            background: #1f1f1f;
+            background: linear-gradient(90deg, #111111, #1e1e1e);
             color: white;
+            padding: 50px 40px;
             text-align: center;
-            padding: 40px;
-            font-size: 32px;
-            font-weight: bold;
         }}
 
+        .header h1 {{
+            margin: 0;
+            font-size: 38px;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }}
+
+        .divider {{
+            width: 60px;
+            height: 4px;
+            background: {accent_color};
+            margin: 18px auto 0;
+        }}
+
+        /* MAIN LAYOUT */
         .container {{
             display: flex;
         }}
 
         .sidebar {{
-            width: 33%;
-            background: #2a2a2a;
+            width: 32%;
+            background: #151515;
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
         }}
 
         .content {{
-            width: 67%;
-            background: #f4f4f4;
-            padding: 40px;
+            width: 68%;
+            background: #f7f7f7;
+            padding: 50px 45px;
         }}
 
-        h3 {{
+        /* SECTION HEADERS */
+        h2 {{
+            font-size: 16px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            text-transform: uppercase;
             border-bottom: 2px solid {accent_color};
-            padding-bottom: 5px;
+            padding-bottom: 6px;
+            margin-top: 30px;
         }}
 
-        .skill-bar {{
-            background: #555;
-            height: 6px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }}
-
-        .skill-fill {{
-            background: {accent_color};
-            width: 70%;
-            height: 6px;
+        /* TEXT */
+        p {{
+            font-size: 14px;
+            line-height: 1.6;
         }}
 
         ul {{
-            padding-left: 20px;
+            padding-left: 18px;
+            margin-top: 8px;
         }}
+
+        li {{
+            font-size: 14px;
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }}
+
+        /* JOB TITLE */
+        .job-title {{
+            font-weight: 600;
+            font-size: 15px;
+            margin-top: 18px;
+        }}
+
+        .company {{
+            color: {accent_color};
+            font-weight: 500;
+        }}
+
+        /* SKILLS */
+        .skill {{
+            margin-bottom: 16px;
+        }}
+
+        .skill-name {{
+            font-size: 13px;
+            margin-bottom: 6px;
+        }}
+
+        .skill-bar {{
+            background: #333;
+            height: 4px;
+        }}
+
+        .skill-fill {{
+            width: 70%;
+            height: 4px;
+            background: {accent_color};
+        }}
+
+        /* EDUCATION */
+        .education-text {{
+            font-size: 13px;
+            line-height: 1.5;
+        }}
+
     </style>
     </head>
 
     <body>
+    <div class="page">
 
-    <div class="header">
-        {resume.get("name","")}
-    </div>
-
-    <div class="container">
-        <div class="sidebar">
-            <h3>Contact</h3>
-            <p>{resume.get("email","")}</p>
-
-            <h3>Skills</h3>
-            {skills_html}
-
-            <h3>Education</h3>
-            <p>{resume.get("education","")}</p>
+        <div class="header">
+            <h1>{resume.get("name","")}</h1>
+            <div class="divider"></div>
         </div>
 
-        <div class="content">
-            <h3>Summary</h3>
-            <p>{resume.get("summary","")}</p>
+        <div class="container">
 
-            <h3>Experience</h3>
-            {experience_html}
+            <div class="sidebar">
+                <h2>Contact</h2>
+                <p>{resume.get("email","")}</p>
+
+                <h2>Skills</h2>
+                {skills_html}
+
+                <h2>Education</h2>
+                <div class="education-text">
+                    {resume.get("education","")}
+                </div>
+            </div>
+
+            <div class="content">
+
+                <h2>Summary</h2>
+                <p>{resume.get("summary","")}</p>
+
+                <h2>Experience</h2>
+                {experience_html}
+
+            </div>
+
         </div>
-    </div>
 
+    </div>
     </body>
     </html>
     """
