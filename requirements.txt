@@ -3,5 +3,3 @@ groq
 supabase
 python-dotenv
 pdfplumber
-xhtml2pdf==0.2.11
-reportlab==3.6.13
