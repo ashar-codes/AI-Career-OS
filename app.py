@@ -8,18 +8,21 @@ import pdfplumber
 st.set_page_config(layout="wide")
 st.title("🚀 AI Career OS")
 
-# -------------------------
+# =========================
 # SESSION STATE
-# -------------------------
+# =========================
 if "user" not in st.session_state:
     st.session_state.user = None
 
 if "resume_data" not in st.session_state:
     st.session_state.resume_data = None
 
+# =========================
+# SIDEBAR MENU
+# =========================
 menu = st.sidebar.selectbox(
     "Menu",
-    ["Login", "Resume Builder", "ATS Analyzer", "Winning Resume Lab"],
+    ["Login", "Resume Builder", "ATS Analyzer", "Winning Resume Lab"]
 )
 
 # =========================
@@ -29,10 +32,10 @@ if menu == "Login":
 
     st.subheader("Login or Sign Up")
 
-    email = st.text_input("Email")
-    password = st.text_input("Password", type="password")
+    email = st.text_input("Email", key="login_email")
+    password = st.text_input("Password", type="password", key="login_password")
 
-    if st.button("Login"):
+    if st.button("Login", key="login_btn"):
         try:
             response = sign_in(email, password)
             if response and response.user:
@@ -43,7 +46,7 @@ if menu == "Login":
         except Exception as e:
             st.error(f"Login error: {e}")
 
-    if st.button("Sign Up"):
+    if st.button("Sign Up", key="signup_btn"):
         try:
             response = sign_up(email, password)
             if response and response.user:
@@ -53,7 +56,7 @@ if menu == "Login":
         except Exception as e:
             st.error(f"Signup error: {e}")
 
-    if st.button("Login with Google"):
+    if st.button("Login with Google", key="google_btn"):
         try:
             sign_in_with_google()
         except Exception as e:
@@ -70,14 +73,17 @@ elif menu == "Resume Builder":
 
         st.subheader("Generate Resume")
 
-        name = st.text_input("Full Name")
-        education = st.text_area("Education")
-        experience = st.text_area("Experience")
-        skills = st.text_area("Skills (comma separated)")
-        target_role = st.text_input("Target Role")
-        job_description = st.text_area("Job Description")
+        name = st.text_input("Full Name", key="name_input")
+        education = st.text_area("Education", key="education_input")
+        experience = st.text_area("Experience", key="experience_input")
+        skills = st.text_area("Skills (comma separated)", key="skills_input")
+        target_role = st.text_input("Target Role", key="target_role_input")
+        job_description = st.text_area("Job Description", key="job_desc_input")
 
-        if st.button("Generate Resume"):
+        # =========================
+        # GENERATE RESUME BUTTON
+        # =========================
+        if st.button("Generate Resume", key="generate_resume_btn"):
             try:
                 data = {
                     "name": name,
@@ -101,9 +107,9 @@ elif menu == "Resume Builder":
             except Exception as e:
                 st.error(f"Resume generation error: {e}")
 
-        # -------------------------
-        # EDIT + PREVIEW
-        # -------------------------
+        # =========================
+        # EDIT + DESIGN + PREVIEW
+        # =========================
         if st.session_state.resume_data:
 
             resume = st.session_state.resume_data
@@ -113,23 +119,29 @@ elif menu == "Resume Builder":
 
             resume["summary"] = st.text_area(
                 "Professional Summary",
-                resume.get("summary", "")
+                resume.get("summary", ""),
+                key="summary_edit"
             )
 
             resume["education"] = st.text_area(
                 "Education Section",
-                resume.get("education", "")
+                resume.get("education", ""),
+                key="education_edit"
             )
 
             skills_input = st.text_area(
                 "Skills (comma separated)",
-                ", ".join(resume.get("skills", []))
+                ", ".join(resume.get("skills", [])),
+                key="skills_edit"
             )
 
             resume["skills"] = [
                 s.strip() for s in skills_input.split(",") if s.strip()
             ]
 
+            # =========================
+            # DESIGN OPTIONS
+            # =========================
             st.divider()
             st.subheader("🎨 Design Options")
 
@@ -141,21 +153,39 @@ elif menu == "Resume Builder":
                 "Navy": "#1a237e"
             }
 
-            preset = st.selectbox("Preset Color", list(preset_colors.keys()))
-            accent_color = st.color_picker(
-                "Custom Accent Color",
-                preset_colors[preset]
+            preset = st.selectbox(
+                "Preset Color",
+                list(preset_colors.keys()),
+                key="preset_select"
             )
 
-            # Generate HTML
-            html_preview = bold_corporate_template(resume, accent_color)
+            accent_color = st.color_picker(
+                "Custom Accent Color",
+                preset_colors[preset],
+                key="accent_picker"
+            )
+
+            photo = st.file_uploader(
+                "Upload Profile Picture (Optional)",
+                type=["jpg", "png"],
+                key="photo_upload"
+            )
+
+            # =========================
+            # GENERATE HTML PREVIEW
+            # =========================
+            html_preview = bold_corporate_template(
+                resume,
+                accent_color,
+                photo
+            )
 
             st.divider()
             st.subheader("👀 Live Preview")
 
             st.components.v1.html(
                 html_preview,
-                height=900,
+                height=950,
                 scrolling=True
             )
 
@@ -165,7 +195,8 @@ elif menu == "Resume Builder":
                 label="⬇ Download Resume (HTML)",
                 data=html_preview,
                 file_name="resume.html",
-                mime="text/html"
+                mime="text/html",
+                key="download_html_btn"
             )
 
             st.info(
@@ -182,7 +213,7 @@ elif menu == "ATS Analyzer":
     else:
         st.subheader("Upload Resume for Analysis")
 
-        file = st.file_uploader("Upload PDF", type=["pdf"])
+        file = st.file_uploader("Upload PDF", type=["pdf"], key="ats_upload")
 
         if file:
             with pdfplumber.open(file) as pdf:
@@ -205,7 +236,7 @@ elif menu == "Winning Resume Lab":
     else:
         st.subheader("Upload Winning Resume")
 
-        file = st.file_uploader("Upload Winning Resume PDF", type=["pdf"])
+        file = st.file_uploader("Upload Winning Resume PDF", type=["pdf"], key="winning_upload")
 
         if file:
             with pdfplumber.open(file) as pdf:
