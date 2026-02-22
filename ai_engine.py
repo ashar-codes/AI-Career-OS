@@ -3,28 +3,32 @@ import os
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+MODEL = "qwen/qwen3-32b"
+
 def generate_resume(data):
 
     prompt = f"""
-You are an expert ATS resume writer.
+Generate a professional ATS-optimized resume.
 
-IMPORTANT:
-- Do NOT include explanations.
-- Do NOT include reasoning.
-- Do NOT include <think> tags.
-- Output ONLY the final formatted resume.
-- No commentary.
+STRICT RULES:
+- Output ONLY the resume.
+- No explanations.
+- No reasoning.
 - No notes.
-- No formatting instructions.
+- No commentary.
+- Do NOT include <think>.
+- Do NOT describe your thinking.
+- Do NOT include formatting notes.
+- Start directly with the candidate name.
 
-Create a clean, professional, ATS-optimized resume.
-
-Use:
-- Strong action verbs
-- Quantified impact where possible
-- Clear section headings
-- Single-column format
-- No extra commentary
+Format:
+Name
+Contact
+Professional Summary
+Education
+Technical Skills
+Professional Experience
+Projects (if applicable)
 
 Candidate Information:
 Name: {data['name']}
@@ -36,16 +40,29 @@ Target Role: {data['target_role']}
 Job Description: {data['job_description']}
 """
 
-response = client.chat.completions.create(
-    model=MODEL,
-    messages=[
-        {"role": "system", "content": "You generate professional resumes only. No reasoning. No explanations."},
-        {"role": "user", "content": prompt}
-    ],
-    temperature=0.4,
-)
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a resume generator. You NEVER output reasoning. You NEVER output analysis. You ONLY output the final resume."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.2,
+        max_tokens=1500
+    )
 
-    return response.choices[0].message.content
+    output = response.choices[0].message.content
+
+    # Hard safety filter (production safety)
+    if "<think>" in output:
+        output = output.split("<think>")[-1]
+
+    return output.strip()
 
 
 def analyze_resume(text):
