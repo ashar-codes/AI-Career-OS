@@ -2,7 +2,7 @@ import base64
 
 def bold_corporate_template(resume, accent_color, photo):
 
-    # Convert uploaded image to base64
+    # ------------------ PROFILE IMAGE ------------------
     image_html = ""
     if photo:
         image_bytes = photo.read()
@@ -13,19 +13,20 @@ def bold_corporate_template(resume, accent_color, photo):
         </div>
         """
 
-    # Skills
+    # ------------------ SKILLS ------------------
     skills_html = ""
-    for skill in resume.get("skills", [])[:8]:
+    for i, skill in enumerate(resume.get("skills", [])[:8]):
+        width = 85 - (i * 5)  # dynamic variation
         skills_html += f"""
         <div class="skill">
             <div class="skill-name">{skill}</div>
             <div class="skill-bar">
-                <div class="skill-fill"></div>
+                <div class="skill-fill" style="width:{width}%;"></div>
             </div>
         </div>
         """
 
-    # Experience timeline
+    # ------------------ EXPERIENCE ------------------
     experience_html = ""
     for exp in resume.get("experience", []):
         bullets = "".join([f"<li>{b}</li>" for b in exp.get("bullets", [])])
@@ -42,6 +43,7 @@ def bold_corporate_template(resume, accent_color, photo):
     html = f"""
     <html>
     <head>
+    <meta charset="UTF-8">
     <style>
 
         @page {{
@@ -51,7 +53,9 @@ def bold_corporate_template(resume, accent_color, photo):
 
         body {{
             margin: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+            background: #ffffff;
+            -webkit-font-smoothing: antialiased;
         }}
 
         .page {{
@@ -59,144 +63,169 @@ def bold_corporate_template(resume, accent_color, photo):
             min-height: 297mm;
         }}
 
-        /* HEADER */
+        /* ================= HEADER ================= */
         .header {{
-            background: linear-gradient(90deg, #2a2a2a, #1f1f1f);
+            background: linear-gradient(90deg, #1f1f1f, #2e2e2e);
             color: white;
-            padding: 50px;
+            padding: 60px 40px 50px 40px;
             text-align: center;
             position: relative;
         }}
 
         .header h1 {{
             margin: 0;
-            font-size: 38px;
+            font-size: 42px;
             font-weight: 700;
+            letter-spacing: 1px;
+        }}
+
+        .subtitle {{
+            margin-top: 10px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #bbbbbb;
         }}
 
         .divider {{
-            width: 60px;
+            width: 70px;
             height: 4px;
             background: {accent_color};
-            margin: 18px auto;
+            margin: 22px auto 0;
             border-radius: 3px;
         }}
 
-        /* Profile */
+        /* ================= PROFILE ================= */
         .profile-container {{
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            bottom: -50px;
+            bottom: -55px;
         }}
 
         .profile-pic {{
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
             border: 5px solid white;
             object-fit: cover;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }}
 
-        /* Layout */
+        /* ================= LAYOUT ================= */
         .container {{
             display: flex;
-            margin-top: 60px;
+            margin-top: 70px;
         }}
 
         .sidebar {{
             width: 30%;
             background: #2f2f2f;
-            color: white;
-            padding: 40px 30px;
+            color: #f5f5f5;
+            padding: 45px 35px;
         }}
 
         .content {{
             width: 70%;
-            padding: 50px;
+            padding: 60px 60px;
             background: #ffffff;
         }}
 
+        /* ================= SECTION HEADERS ================= */
         h2 {{
             font-size: 14px;
             letter-spacing: 2px;
             text-transform: uppercase;
+            font-weight: 600;
             border-bottom: 2px solid {accent_color};
             padding-bottom: 6px;
-            margin-top: 30px;
+            margin-top: 35px;
         }}
 
         p {{
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.7;
+            margin-top: 10px;
         }}
 
-        /* Skills */
+        /* ================= SKILLS ================= */
         .skill {{
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }}
 
         .skill-name {{
             font-size: 13px;
+            margin-bottom: 6px;
         }}
 
         .skill-bar {{
-            height: 4px;
             background: #444;
-            border-radius: 4px;
-            margin-top: 5px;
+            height: 6px;
+            border-radius: 6px;
         }}
 
         .skill-fill {{
-            height: 4px;
-            width: 70%;
+            height: 6px;
             background: {accent_color};
-            border-radius: 4px;
+            border-radius: 6px;
         }}
 
-        /* Timeline */
-        .timeline-item {{
+        /* ================= TIMELINE ================= */
+        .timeline {{
             position: relative;
-            margin-left: 20px;
-            margin-bottom: 30px;
+            padding-left: 30px;
         }}
 
-        .timeline-item::before {{
+        .timeline::before {{
             content: '';
             position: absolute;
-            left: -20px;
+            left: 8px;
             top: 0;
             bottom: 0;
             width: 2px;
             background: {accent_color};
         }}
 
+        .timeline-item {{
+            position: relative;
+            margin-bottom: 35px;
+        }}
+
         .timeline-dot {{
-            width: 10px;
-            height: 10px;
+            position: absolute;
+            left: -2px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
             background: {accent_color};
             border-radius: 50%;
-            position: absolute;
-            left: -25px;
-            top: 5px;
         }}
 
         .job-title {{
             font-weight: 600;
-            font-size: 15px;
+            font-size: 16px;
         }}
 
         .company {{
             color: {accent_color};
+            font-weight: 500;
         }}
 
         ul {{
-            margin-top: 8px;
+            margin-top: 10px;
+            padding-left: 18px;
         }}
 
         li {{
-            margin-bottom: 6px;
             font-size: 14px;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }}
+
+        .education-text {{
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 10px;
         }}
 
     </style>
@@ -207,6 +236,7 @@ def bold_corporate_template(resume, accent_color, photo):
 
         <div class="header">
             <h1>{resume.get("name","")}</h1>
+            <div class="subtitle">Software Engineer</div>
             <div class="divider"></div>
             {image_html}
         </div>
@@ -214,22 +244,28 @@ def bold_corporate_template(resume, accent_color, photo):
         <div class="container">
 
             <div class="sidebar">
-                <h2>Contact</h2>
+                <h2>✉ Contact</h2>
                 <p>{resume.get("email","")}</p>
 
-                <h2>Skills</h2>
+                <h2>⚙ Skills</h2>
                 {skills_html}
 
-                <h2>Education</h2>
-                <p>{resume.get("education","")}</p>
+                <h2>🎓 Education</h2>
+                <div class="education-text">
+                    {resume.get("education","")}
+                </div>
             </div>
 
             <div class="content">
-                <h2>Summary</h2>
+
+                <h2>🧠 Summary</h2>
                 <p>{resume.get("summary","")}</p>
 
-                <h2>Experience</h2>
-                {experience_html}
+                <h2>💼 Experience</h2>
+                <div class="timeline">
+                    {experience_html}
+                </div>
+
             </div>
 
         </div>
