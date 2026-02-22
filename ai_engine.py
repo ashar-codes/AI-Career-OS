@@ -51,7 +51,7 @@ def analyze_resume(text):
     """
 
     response = client.chat.completions.create(
-    model="llama-3.1-8b-instant",
+   model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
@@ -76,7 +76,7 @@ def analyze_winning_resume(text):
     """
 
     response = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
