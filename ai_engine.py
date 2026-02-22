@@ -3,32 +3,19 @@ import os
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-MODEL = "qwen/qwen3-32b"
+MODEL = "openai/gpt-oss-120b"
+
+MODEL = "openai/gpt-oss-120b"
 
 def generate_resume(data):
 
     prompt = f"""
-Generate a professional ATS-optimized resume.
+Create a professional ATS-optimized resume.
 
-STRICT RULES:
-- Output ONLY the resume.
-- No explanations.
-- No reasoning.
-- No notes.
-- No commentary.
-- Do NOT include <think>.
-- Do NOT describe your thinking.
-- Do NOT include formatting notes.
-- Start directly with the candidate name.
-
-Format:
-Name
-Contact
-Professional Summary
-Education
-Technical Skills
-Professional Experience
-Projects (if applicable)
+Output ONLY the final resume.
+Do NOT include explanations.
+Do NOT include reasoning.
+Start directly with the candidate name.
 
 Candidate Information:
 Name: {data['name']}
@@ -42,27 +29,12 @@ Job Description: {data['job_description']}
 
     response = client.chat.completions.create(
         model=MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a resume generator. You NEVER output reasoning. You NEVER output analysis. You ONLY output the final resume."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        temperature=0.2,
-        max_tokens=1500
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+        max_tokens=1200
     )
 
-    output = response.choices[0].message.content
-
-    # Hard safety filter (production safety)
-    if "<think>" in output:
-        output = output.split("<think>")[-1]
-
-    return output.strip()
+    return response.choices[0].message.content.strip()
 
 
 def analyze_resume(text):
@@ -81,7 +53,7 @@ def analyze_resume(text):
     """
 
     response = client.chat.completions.create(
-   MODEL = "qwen/qwen3-32b",
+   MODEL = "openai/gpt-oss-120b",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
@@ -106,7 +78,7 @@ def analyze_winning_resume(text):
     """
 
     response = client.chat.completions.create(
-        MODEL = "qwen/qwen3-32b",
+        MODEL = "openai/gpt-oss-120b",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
