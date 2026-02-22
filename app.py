@@ -77,7 +77,8 @@ elif menu == "Resume Builder":
         target_role = st.text_input("Target Role")
         job_description = st.text_area("Job Description")
 
-        if st.button("Generate"):
+        if st.button("Generate Resume"):
+
             try:
                 data = {
                     "name": name,
@@ -92,10 +93,11 @@ elif menu == "Resume Builder":
                 raw_output = generate_resume(data)
                 resume_json = json.loads(raw_output)
 
-                # Ensure name is stored
+                # Ensure name exists
                 resume_json["name"] = name
 
                 st.session_state.resume_data = resume_json
+                st.success("Resume generated successfully!")
 
             except Exception as e:
                 st.error(f"Resume generation error: {e}")
@@ -103,7 +105,7 @@ elif menu == "Resume Builder":
         # -------------------------
         # EDITABLE PREVIEW
         # -------------------------
-        if st.session_state.resume_data:
+        if "resume_data" in st.session_state and st.session_state.resume_data:
 
             st.divider()
             st.subheader("✏ Edit Resume")
@@ -124,21 +126,27 @@ elif menu == "Resume Builder":
                 "Skills (comma separated)",
                 ", ".join(resume.get("skills", []))
             )
-            resume["skills"] = [s.strip() for s in skills_input.split(",") if s.strip()]
+
+            resume["skills"] = [
+                s.strip() for s in skills_input.split(",") if s.strip()
+            ]
 
             st.markdown("### Experience")
 
             for i, exp in enumerate(resume.get("experience", [])):
+
                 exp["title"] = st.text_input(
                     f"Title {i+1}",
                     exp.get("title", ""),
                     key=f"title_{i}"
                 )
+
                 exp["company"] = st.text_input(
                     f"Company {i+1}",
                     exp.get("company", ""),
                     key=f"company_{i}"
                 )
+
                 exp["duration"] = st.text_input(
                     f"Duration {i+1}",
                     exp.get("duration", ""),
@@ -158,6 +166,7 @@ elif menu == "Resume Builder":
             st.markdown("### Projects")
 
             for i, proj in enumerate(resume.get("projects", [])):
+
                 proj["title"] = st.text_input(
                     f"Project Title {i+1}",
                     proj.get("title", ""),
@@ -182,13 +191,23 @@ elif menu == "Resume Builder":
 
             template = st.selectbox(
                 "Template",
-                ["Corporate Minimal", "Modern Two Column", "Executive Elegant", "Creative Accent"],
+                [
+                    "Corporate Minimal",
+                    "Modern Two Column",
+                    "Executive Elegant",
+                    "Creative Accent"
+                ],
                 index=0
             )
 
             font_choice = st.selectbox(
                 "Font",
-                ["Helvetica", "Arial", "Open Sans", "Montserrat", "Georgia", "Times New Roman", "Roboto"],
+                [
+                    "Helvetica",
+                    "Arial",
+                    "Georgia",
+                    "Times New Roman"
+                ],
                 index=0
             )
 
@@ -200,7 +219,11 @@ elif menu == "Resume Builder":
                 "Navy": "#1a237e"
             }
 
-            preset = st.selectbox("Preset Color", list(preset_colors.keys()))
+            preset = st.selectbox(
+                "Preset Color",
+                list(preset_colors.keys())
+            )
+
             accent_color = st.color_picker(
                 "Custom Accent Color",
                 preset_colors[preset]
@@ -214,7 +237,9 @@ elif menu == "Resume Builder":
             # -------------------------
             # PDF GENERATION
             # -------------------------
-            if st.button("Generate PDF"):
+            st.divider()
+
+            if st.button("📄 Generate PDF"):
 
                 pdf_path = generate_pdf(
                     resume,
@@ -226,58 +251,11 @@ elif menu == "Resume Builder":
 
                 with open(pdf_path, "rb") as f:
                     st.download_button(
-                        "📄 Download Resume PDF",
-                        f,
+                        label="⬇ Download Resume PDF",
+                        data=f,
                         file_name="resume.pdf",
                         mime="application/pdf"
                     )
-
-        # -------------------------
-        # EDITABLE PREVIEW
-        # -------------------------
-        if st.session_state.resume_data:
-
-            st.divider()
-            st.subheader("✏ Edit Resume")
-
-            resume = st.session_state.resume_data
-
-            resume["summary"] = st.text_area("Professional Summary", resume.get("summary", ""))
-
-            resume["education"] = st.text_area("Education Section", resume.get("education", ""))
-
-            skills_input = st.text_area(
-                "Skills (comma separated)",
-                ", ".join(resume.get("skills", []))
-            )
-            resume["skills"] = [s.strip() for s in skills_input.split(",") if s.strip()]
-
-            st.markdown("### Experience")
-
-            for i, exp in enumerate(resume.get("experience", [])):
-                exp["title"] = st.text_input(f"Title {i+1}", exp.get("title", ""), key=f"title_{i}")
-                exp["company"] = st.text_input(f"Company {i+1}", exp.get("company", ""), key=f"company_{i}")
-                exp["duration"] = st.text_input(f"Duration {i+1}", exp.get("duration", ""), key=f"duration_{i}")
-
-                bullets_text = st.text_area(
-                    f"Bullets {i+1} (one per line)",
-                    "\n".join(exp.get("bullets", [])),
-                    key=f"bullets_{i}"
-                )
-                exp["bullets"] = [b.strip() for b in bullets_text.split("\n") if b.strip()]
-
-            st.markdown("### Projects")
-
-            for i, proj in enumerate(resume.get("projects", [])):
-                proj["title"] = st.text_input(f"Project Title {i+1}", proj.get("title", ""), key=f"proj_title_{i}")
-
-                proj_bullets = st.text_area(
-                    f"Project Bullets {i+1} (one per line)",
-                    "\n".join(proj.get("bullets", [])),
-                    key=f"proj_bullets_{i}"
-                )
-                proj["bullets"] = [b.strip() for b in proj_bullets.split("\n") if b.strip()]
-
             # -------------------------
             # TEMPLATE & STYLE OPTIONS
             # -------------------------
