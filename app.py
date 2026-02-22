@@ -2,6 +2,7 @@ import streamlit as st
 import json
 from auth import sign_in, sign_up, sign_in_with_google
 from ai_engine import generate_resume, analyze_resume, analyze_winning_resume
+from pdf_generator import generate_pdf
 import pdfplumber
 
 st.set_page_config(layout="wide")
@@ -18,19 +19,21 @@ if "resume_data" not in st.session_state:
 
 menu = st.sidebar.selectbox(
     "Menu",
-    ["Login", "Resume Builder", "ATS Analyzer", "Winning Resume Lab"]
+    ["Login", "Resume Builder", "ATS Analyzer", "Winning Resume Lab"],
+    key="main_menu"
 )
 
 # -------------------------
 # LOGIN PAGE
 # -------------------------
 if menu == "Login":
+
     st.subheader("Login or Sign Up")
 
-    email = st.text_input("Email")
-    password = st.text_input("Password", type="password")
+    email = st.text_input("Email", key="login_email")
+    password = st.text_input("Password", type="password", key="login_password")
 
-    if st.button("Login"):
+    if st.button("Login", key="login_btn"):
         try:
             response = sign_in(email, password)
             if response and response.user:
@@ -41,7 +44,7 @@ if menu == "Login":
         except Exception as e:
             st.error(f"Login error: {e}")
 
-    if st.button("Sign Up"):
+    if st.button("Sign Up", key="signup_btn"):
         try:
             response = sign_up(email, password)
             if response and response.user:
@@ -51,7 +54,7 @@ if menu == "Login":
         except Exception as e:
             st.error(f"Signup error: {e}")
 
-    if st.button("Login with Google"):
+    if st.button("Login with Google", key="google_btn"):
         try:
             sign_in_with_google()
         except Exception as e:
@@ -62,22 +65,20 @@ if menu == "Login":
 # -------------------------
 elif menu == "Resume Builder":
 
-    import json
-    from pdf_generator import generate_pdf
-
     if not st.session_state.user:
         st.warning("Please login first.")
     else:
+
         st.subheader("Generate Resume")
 
-        name = st.text_input("Full Name")
-        education = st.text_area("Education")
-        experience = st.text_area("Experience")
-        skills = st.text_area("Skills (comma separated)")
-        target_role = st.text_input("Target Role")
-        job_description = st.text_area("Job Description")
+        name = st.text_input("Full Name", key="name")
+        education = st.text_area("Education", key="education")
+        experience = st.text_area("Experience", key="experience")
+        skills = st.text_area("Skills (comma separated)", key="skills")
+        target_role = st.text_input("Target Role", key="target_role")
+        job_description = st.text_area("Job Description", key="job_desc")
 
-        if st.button("Generate Resume"):
+        if st.button("Generate Resume", key="generate_resume_btn"):
 
             try:
                 data = {
@@ -92,8 +93,6 @@ elif menu == "Resume Builder":
 
                 raw_output = generate_resume(data)
                 resume_json = json.loads(raw_output)
-
-                # Ensure name exists
                 resume_json["name"] = name
 
                 st.session_state.resume_data = resume_json
@@ -105,26 +104,29 @@ elif menu == "Resume Builder":
         # -------------------------
         # EDITABLE PREVIEW
         # -------------------------
-        if "resume_data" in st.session_state and st.session_state.resume_data:
+        if st.session_state.resume_data:
+
+            resume = st.session_state.resume_data
 
             st.divider()
             st.subheader("✏ Edit Resume")
 
-            resume = st.session_state.resume_data
-
             resume["summary"] = st.text_area(
                 "Professional Summary",
-                resume.get("summary", "")
+                resume.get("summary", ""),
+                key="summary_edit"
             )
 
             resume["education"] = st.text_area(
                 "Education Section",
-                resume.get("education", "")
+                resume.get("education", ""),
+                key="education_edit"
             )
 
             skills_input = st.text_area(
                 "Skills (comma separated)",
-                ", ".join(resume.get("skills", []))
+                ", ".join(resume.get("skills", [])),
+                key="skills_edit"
             )
 
             resume["skills"] = [
@@ -187,75 +189,49 @@ elif menu == "Resume Builder":
             # DESIGN OPTIONS
             # -------------------------
             st.divider()
-st.subheader("🎨 Design Options")
+            st.subheader("🎨 Design Options")
 
-template = st.selectbox(
-    "Template",
-    ["Corporate Minimal", "Modern Two Column", "Executive Elegant", "Creative Accent"],
-    index=0,
-    key="template_select"
-)
+            template = st.selectbox(
+                "Template",
+                ["Corporate Minimal", "Modern Two Column", "Executive Elegant", "Creative Accent"],
+                key="template_select"
+            )
 
-font_choice = st.selectbox(
-    "Font",
-    ["Helvetica", "Arial", "Georgia", "Times New Roman"],
-    index=0,
-    key="font_select"
-)
+            font_choice = st.selectbox(
+                "Font",
+                ["Helvetica", "Arial", "Georgia", "Times New Roman"],
+                key="font_select"
+            )
 
-preset_colors = {
-    "Corporate Blue": "#1f4e79",
-    "Charcoal": "#333333",
-    "Emerald": "#0f5132",
-    "Burgundy": "#6f1d1b",
-    "Navy": "#1a237e"
-}
+            preset_colors = {
+                "Corporate Blue": "#1f4e79",
+                "Charcoal": "#333333",
+                "Emerald": "#0f5132",
+                "Burgundy": "#6f1d1b",
+                "Navy": "#1a237e"
+            }
 
-preset = st.selectbox(
-    "Preset Color",
-    list(preset_colors.keys()),
-    key="preset_color_select"
-)
+            preset = st.selectbox(
+                "Preset Color",
+                list(preset_colors.keys()),
+                key="preset_select"
+            )
 
-accent_color = st.color_picker(
-    "Custom Accent Color",
-    preset_colors[preset],
-    key="color_picker"
-)
+            accent_color = st.color_picker(
+                "Custom Accent Color",
+                preset_colors[preset],
+                key="color_picker"
+            )
 
-photo = st.file_uploader(
-    "Upload Profile Picture (Optional)",
-    type=["jpg", "png"],
-    key="photo_upload"
-)
+            photo = st.file_uploader(
+                "Upload Profile Picture (Optional)",
+                type=["jpg", "png"],
+                key="photo_upload"
+            )
 
-st.divider()
-
-if st.button("📄 Generate PDF", key="generate_pdf_btn"):
-
-    pdf_path = generate_pdf(
-        resume,
-        template,
-        font_choice,
-        accent_color,
-        photo
-    )
-
-    with open(pdf_path, "rb") as f:
-        st.download_button(
-            label="⬇ Download Resume PDF",
-            data=f,
-            file_name="resume.pdf",
-            mime="application/pdf",
-            key="download_pdf_btn"
-        )
-
-            # -------------------------
-            # PDF GENERATION
-            # -------------------------
             st.divider()
 
-            if st.button("📄 Generate PDF"):
+            if st.button("📄 Generate PDF", key="generate_pdf_btn"):
 
                 pdf_path = generate_pdf(
                     resume,
@@ -267,43 +243,12 @@ if st.button("📄 Generate PDF", key="generate_pdf_btn"):
 
                 with open(pdf_path, "rb") as f:
                     st.download_button(
-                        label="⬇ Download Resume PDF",
-                        data=f,
+                        "⬇ Download Resume PDF",
+                        f,
                         file_name="resume.pdf",
-                        mime="application/pdf"
+                        mime="application/pdf",
+                        key="download_btn"
                     )
-            # -------------------------
-            # TEMPLATE & STYLE OPTIONS
-            # -------------------------
-            st.divider()
-            st.subheader("🎨 Design Options")
-
-            template = st.selectbox(
-                "Template",
-                ["Corporate Minimal", "Modern Two Column", "Executive Elegant", "Creative Accent"],
-                index=0
-            )
-
-            font_choice = st.selectbox(
-                "Font",
-                ["Helvetica", "Arial", "Open Sans", "Montserrat", "Georgia", "Times New Roman", "Roboto"],
-                index=0
-            )
-
-            preset_colors = {
-                "Corporate Blue": "#1f4e79",
-                "Charcoal": "#333333",
-                "Emerald": "#0f5132",
-                "Burgundy": "#6f1d1b",
-                "Navy": "#1a237e"
-            }
-
-            preset = st.selectbox("Preset Color", list(preset_colors.keys()))
-            accent_color = st.color_picker("Custom Accent Color", preset_colors[preset])
-
-            photo = st.file_uploader("Upload Profile Picture (Optional)", type=["jpg", "png"])
-
-            st.success("Resume ready for PDF generation (PDF engine coming next).")
 
 # -------------------------
 # ATS ANALYZER
@@ -315,7 +260,7 @@ elif menu == "ATS Analyzer":
     else:
         st.subheader("Upload Resume for Analysis")
 
-        file = st.file_uploader("Upload PDF", type=["pdf"])
+        file = st.file_uploader("Upload PDF", type=["pdf"], key="ats_upload")
 
         if file:
             with pdfplumber.open(file) as pdf:
@@ -338,7 +283,7 @@ elif menu == "Winning Resume Lab":
     else:
         st.subheader("Upload Winning Resume")
 
-        file = st.file_uploader("Upload Winning Resume PDF", type=["pdf"])
+        file = st.file_uploader("Upload Winning Resume PDF", type=["pdf"], key="winning_upload")
 
         if file:
             with pdfplumber.open(file) as pdf:
