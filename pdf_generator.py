@@ -1,242 +1,224 @@
-from reportlab.lib.utils import ImageReader
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer,
-    Frame,
-    ListFlowable,
-    ListItem,
-    Image
-)
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import inch
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
-from reportlab.graphics.shapes import Drawing, Circle
-from reportlab.graphics import renderPDF
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
 import tempfile
-import os
 
 PAGE_WIDTH, PAGE_HEIGHT = A4
 
 
-# -----------------------------
-# UTILITIES
-# -----------------------------
-
 def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip("#")
     return colors.Color(
-        int(hex_color[0:2], 16) / 255,
-        int(hex_color[2:4], 16) / 255,
-        int(hex_color[4:6], 16) / 255
+        int(hex_color[0:2], 16)/255,
+        int(hex_color[2:4], 16)/255,
+        int(hex_color[4:6], 16)/255
     )
 
 
-def register_fonts():
-    # Embed fonts (add your own .ttf later if needed)
-    try:
-        pdfmetrics.registerFont(TTFont("Montserrat", "Montserrat-Regular.ttf"))
-        pdfmetrics.registerFont(TTFont("Montserrat-Bold", "Montserrat-Bold.ttf"))
-        return "Montserrat", "Montserrat-Bold"
-    except:
-        return "Helvetica", "Helvetica-Bold"
-
-
-# -----------------------------
-# CIRCULAR IMAGE MASK
-# -----------------------------
-
-def draw_circular_image(c, uploaded_file, x, y, size):
-
-    image = ImageReader(uploaded_file)
+def draw_circular_image(c, image_file, x, y, size):
+    img = ImageReader(image_file)
 
     path = c.beginPath()
-    path.circle(x + size / 2, y + size / 2, size / 2)
+    path.circle(x + size/2, y + size/2, size/2)
 
     c.saveState()
     c.clipPath(path, stroke=0, fill=0)
-
-    c.drawImage(
-        image,
-        x,
-        y,
-        width=size,
-        height=size,
-        preserveAspectRatio=True,
-        mask='auto'
-    )
-
+    c.drawImage(img, x, y, size, size, preserveAspectRatio=True, mask='auto')
     c.restoreState()
 
 
-# -----------------------------
-# HEADER DRAWERS
-# -----------------------------
+def wrap_text(text, font, size, max_width, c):
+    words = text.split()
+    lines = []
+    current = ""
 
-def header_full_band(c, accent, name):
-    c.setFillColor(accent)
-    c.rect(0, PAGE_HEIGHT - 120, PAGE_WIDTH, 120, fill=1)
-    c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 30)
-    c.drawCentredString(PAGE_WIDTH / 2, PAGE_HEIGHT - 70, name)
+    c.setFont(font, size)
 
+    for word in words:
+        test = current + " " + word if current else word
+        if c.stringWidth(test, font, size) < max_width:
+            current = test
+        else:
+            lines.append(current)
+            current = word
 
-def header_block(c, accent, name):
-    c.setFont("Helvetica-Bold", 30)
-    c.drawCentredString(PAGE_WIDTH / 2, PAGE_HEIGHT - 80, name)
-    c.setFillColor(accent)
-    c.rect(PAGE_WIDTH/2 - 120, PAGE_HEIGHT - 100, 240, 8, fill=1)
+    if current:
+        lines.append(current)
 
+    return lines
 
-def header_sidebar(c, accent):
-    c.setFillColor(accent)
-    c.rect(0, 0, 60, PAGE_HEIGHT, fill=1)
-
-
-# -----------------------------
-# MAIN GENERATOR
-# -----------------------------
 
 def generate_pdf(resume, template, font_choice, accent_hex, photo):
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-    doc = SimpleDocTemplate(
-        tmp.name,
-        pagesize=A4,
-        rightMargin=40,
-        leftMargin=40,
-        topMargin=40,
-        bottomMargin=40
-    )
+    c = canvas.Canvas(tmp.name, pagesize=A4)
 
     accent = hex_to_rgb(accent_hex)
-    base_font, bold_font = register_fonts()
 
-    styles = getSampleStyleSheet()
+    sidebar_width = PAGE_WIDTH * 0.35
+    content_x = sidebar_width + 40
+    content_width = PAGE_WIDTH - sidebar_width - 80
 
-    h1 = ParagraphStyle(
-        "h1",
-        parent=styles["Heading1"],
-        fontName=bold_font,
-        fontSize=24,
-        spaceAfter=12,
-        textColor=colors.black
-    )
+    # =============================
+    # SIDEBAR BACKGROUND
+    # =============================
+    c.setFillColor(accent)
+    c.rect(0, 0, sidebar_width, PAGE_HEIGHT, fill=1)
 
-    h2 = ParagraphStyle(
-        "h2",
-        parent=styles["Heading2"],
-        fontName=bold_font,
-        fontSize=14,
-        textColor=accent,
-        spaceAfter=6
-    )
-
-    body = ParagraphStyle(
-        "body",
-        parent=styles["Normal"],
-        fontName=base_font,
-        fontSize=11,
-        leading=16,
-        spaceAfter=6
-    )
-
-    story = []
-
-    # -----------------------------
-    # HEADER RENDER VIA CANVAS
-    # -----------------------------
-    def first_page(canvas_obj, doc_obj):
-        if template == "Full Width Color Band":
-            header_full_band(canvas_obj, accent, resume.get("name", ""))
-        elif template == "Block Under Name":
-            header_block(canvas_obj, accent, resume.get("name", ""))
-        elif template == "Vertical Sidebar Accent":
-            header_sidebar(canvas_obj, accent)
-            canvas_obj.setFont(bold_font, 26)
-            canvas_obj.drawString(80, PAGE_HEIGHT - 80, resume.get("name", ""))
-
-        if photo:
-            draw_circular_image(
-                canvas_obj,
-                photo,
-                PAGE_WIDTH - 130,
-                PAGE_HEIGHT - 140,
-                90
-            )
-
-    # -----------------------------
-    # TYPOGRAPHIC SCALE
-    # -----------------------------
-    story.append(Spacer(1, 120))
-
-    # SUMMARY
-    story.append(Paragraph("🧑 Professional Summary", h2))
-    story.append(Paragraph(resume.get("summary", ""), body))
-    story.append(Spacer(1, 12))
-
-    # TWO COLUMN LAYOUT
-    left_frame = Frame(40, 40, 180, PAGE_HEIGHT - 200, showBoundary=0)
-    right_frame = Frame(240, 40, PAGE_WIDTH - 280, PAGE_HEIGHT - 200, showBoundary=0)
-
-    left_story = []
-    right_story = []
-
-    # SIDEBAR CONTENT
-    left_story.append(Paragraph("🛠 Skills", h2))
-    skills = resume.get("skills", [])
-    skill_list = [
-        ListItem(Paragraph(skill, body))
-        for skill in skills
-    ]
-    left_story.append(ListFlowable(skill_list, bulletType='bullet'))
-    left_story.append(Spacer(1, 20))
-
-    left_story.append(Paragraph("🎓 Education", h2))
-    left_story.append(Paragraph(resume.get("education", ""), body))
-
-    # MAIN CONTENT
-    right_story.append(Paragraph("💼 Experience", h2))
-
-    for exp in resume.get("experience", []):
-        right_story.append(
-            Paragraph(
-                f"<b>{exp.get('title','')}</b> | {exp.get('company','')} ({exp.get('duration','')})",
-                body
-            )
+    # =============================
+    # PHOTO
+    # =============================
+    if photo:
+        draw_circular_image(
+            c,
+            photo,
+            sidebar_width/2 - 60,
+            PAGE_HEIGHT - 200,
+            120
         )
 
-        bullets = [
-            ListItem(Paragraph(b, body))
-            for b in exp.get("bullets", [])
-        ]
-        right_story.append(ListFlowable(bullets, bulletType='bullet'))
-        right_story.append(Spacer(1, 10))
+    y_sidebar = PAGE_HEIGHT - 250
 
-    if resume.get("projects"):
-        right_story.append(Paragraph("🚀 Projects", h2))
-        for proj in resume.get("projects", []):
-            right_story.append(Paragraph(f"<b>{proj.get('title','')}</b>", body))
-            bullets = [
-                ListItem(Paragraph(b, body))
-                for b in proj.get("bullets", [])
-            ]
-            right_story.append(ListFlowable(bullets, bulletType='bullet'))
-            right_story.append(Spacer(1, 10))
+    c.setFillColor(colors.white)
 
-    doc.build(
-        story,
-        onFirstPage=first_page
+    # =============================
+    # CONTACT
+    # =============================
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(40, y_sidebar, "CONTACT")
+    y_sidebar -= 20
+
+    c.setFont("Helvetica", 10)
+    contact_lines = [
+        resume.get("email", ""),
+    ]
+
+    for line in contact_lines:
+        wrapped = wrap_text(line, "Helvetica", 10, sidebar_width - 80, c)
+        for w in wrapped:
+            c.drawString(40, y_sidebar, w)
+            y_sidebar -= 14
+
+    y_sidebar -= 20
+
+    # =============================
+    # SKILLS
+    # =============================
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(40, y_sidebar, "SKILLS")
+    y_sidebar -= 20
+
+    c.setFont("Helvetica", 10)
+
+    for skill in resume.get("skills", []):
+        wrapped = wrap_text(skill, "Helvetica", 10, sidebar_width - 80, c)
+        for w in wrapped:
+            c.drawString(40, y_sidebar, "• " + w)
+            y_sidebar -= 14
+
+    y_sidebar -= 20
+
+    # =============================
+    # EDUCATION
+    # =============================
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(40, y_sidebar, "EDUCATION")
+    y_sidebar -= 20
+
+    edu_lines = wrap_text(
+        resume.get("education", ""),
+        "Helvetica",
+        10,
+        sidebar_width - 80,
+        c
     )
 
-    # Draw column frames
-    c = canvas.Canvas(tmp.name)
-    left_frame.addFromList(left_story, c)
-    right_frame.addFromList(right_story, c)
-    c.save()
+    for line in edu_lines:
+        c.drawString(40, y_sidebar, line)
+        y_sidebar -= 14
 
+    # =============================
+    # MAIN CONTENT
+    # =============================
+    y_main = PAGE_HEIGHT - 120
+
+    # NAME
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 32)
+    c.drawString(content_x, y_main, resume.get("name", ""))
+    y_main -= 30
+
+    # Divider
+    c.setStrokeColor(accent)
+    c.setLineWidth(3)
+    c.line(content_x, y_main, content_x + content_width, y_main)
+    y_main -= 30
+
+    # SUMMARY
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(content_x, y_main, "PROFESSIONAL SUMMARY")
+    y_main -= 20
+
+    c.setFont("Helvetica", 10.5)
+    summary_lines = wrap_text(
+        resume.get("summary", ""),
+        "Helvetica",
+        10.5,
+        content_width,
+        c
+    )
+
+    for line in summary_lines:
+        c.drawString(content_x, y_main, line)
+        y_main -= 14
+
+    y_main -= 25
+
+    # EXPERIENCE
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(content_x, y_main, "EXPERIENCE")
+    y_main -= 20
+
+    for exp in resume.get("experience", []):
+        c.setFont("Helvetica-Bold", 11)
+        title_line = f"{exp.get('title','')} | {exp.get('company','')} ({exp.get('duration','')})"
+        c.drawString(content_x, y_main, title_line)
+        y_main -= 16
+
+        c.setFont("Helvetica", 10)
+
+        for bullet in exp.get("bullets", []):
+            bullet_lines = wrap_text(bullet, "Helvetica", 10, content_width - 15, c)
+            for i, bl in enumerate(bullet_lines):
+                prefix = "• " if i == 0 else "   "
+                c.drawString(content_x, y_main, prefix + bl)
+                y_main -= 14
+
+        y_main -= 10
+
+    # PROJECTS
+    if resume.get("projects"):
+        y_main -= 10
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(content_x, y_main, "PROJECTS")
+        y_main -= 20
+
+        for proj in resume.get("projects", []):
+            c.setFont("Helvetica-Bold", 11)
+            c.drawString(content_x, y_main, proj.get("title", ""))
+            y_main -= 16
+
+            c.setFont("Helvetica", 10)
+
+            for bullet in proj.get("bullets", []):
+                bullet_lines = wrap_text(bullet, "Helvetica", 10, content_width - 15, c)
+                for i, bl in enumerate(bullet_lines):
+                    prefix = "• " if i == 0 else "   "
+                    c.drawString(content_x, y_main, prefix + bl)
+                    y_main -= 14
+
+            y_main -= 10
+
+    c.save()
     return tmp.name
