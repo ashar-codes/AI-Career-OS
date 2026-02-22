@@ -6,31 +6,44 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 def generate_resume(data):
 
     prompt = f"""
-    You are an expert ATS resume writer.
+You are an expert ATS resume writer.
 
-    Create a professional, achievement-focused resume.
+IMPORTANT:
+- Do NOT include explanations.
+- Do NOT include reasoning.
+- Do NOT include <think> tags.
+- Output ONLY the final formatted resume.
+- No commentary.
+- No notes.
+- No formatting instructions.
 
-    Candidate Information:
-    Name: {data['name']}
-    Email: {data['email']}
-    Education: {data['education']}
-    Experience: {data['experience']}
-    Skills: {data['skills']}
-    Target Role: {data['target_role']}
-    Job Description: {data['job_description']}
+Create a clean, professional, ATS-optimized resume.
 
-    Requirements:
-    - Use strong action verbs
-    - Quantify impact
-    - Optimize for ATS
-    - Clean formatting
-    """
+Use:
+- Strong action verbs
+- Quantified impact where possible
+- Clear section headings
+- Single-column format
+- No extra commentary
 
-    response = client.chat.completions.create(
-model="qwen/qwen3-32b",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7,
-    )
+Candidate Information:
+Name: {data['name']}
+Email: {data['email']}
+Education: {data['education']}
+Experience: {data['experience']}
+Skills: {data['skills']}
+Target Role: {data['target_role']}
+Job Description: {data['job_description']}
+"""
+
+response = client.chat.completions.create(
+    model=MODEL,
+    messages=[
+        {"role": "system", "content": "You generate professional resumes only. No reasoning. No explanations."},
+        {"role": "user", "content": prompt}
+    ],
+    temperature=0.4,
+)
 
     return response.choices[0].message.content
 
