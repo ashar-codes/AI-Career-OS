@@ -2,7 +2,8 @@ import streamlit as st
 import json
 from auth import sign_in, sign_up, sign_in_with_google
 from ai_engine import generate_resume, analyze_resume, analyze_winning_resume
-from pdf_generator import generate_pdf
+from html_templates import bold_corporate_template
+from pdf_generator import generate_pdf_from_html
 import pdfplumber
 
 st.set_page_config(layout="wide")
@@ -94,6 +95,7 @@ elif menu == "Resume Builder":
                 raw_output = generate_resume(data)
                 resume_json = json.loads(raw_output)
                 resume_json["name"] = name
+                resume_json["email"] = st.session_state.user.email
 
                 st.session_state.resume_data = resume_json
                 st.success("Resume generated successfully!")
@@ -191,18 +193,6 @@ elif menu == "Resume Builder":
             st.divider()
             st.subheader("🎨 Design Options")
 
-            template = st.selectbox(
-                "Template",
-                ["Corporate Minimal", "Modern Two Column", "Executive Elegant", "Creative Accent"],
-                key="template_select"
-            )
-
-            font_choice = st.selectbox(
-                "Font",
-                ["Helvetica", "Arial", "Georgia", "Times New Roman"],
-                key="font_select"
-            )
-
             preset_colors = {
                 "Corporate Blue": "#1f4e79",
                 "Charcoal": "#333333",
@@ -223,23 +213,17 @@ elif menu == "Resume Builder":
                 key="color_picker"
             )
 
-            photo = st.file_uploader(
-                "Upload Profile Picture (Optional)",
-                type=["jpg", "png"],
-                key="photo_upload"
-            )
-
             st.divider()
 
+            # HTML PREVIEW
+            html_preview = bold_corporate_template(resume, accent_color)
+            st.subheader("👀 Live Preview")
+            st.components.v1.html(html_preview, height=800, scrolling=True)
+
+            # PDF GENERATION
             if st.button("📄 Generate PDF", key="generate_pdf_btn"):
 
-                pdf_path = generate_pdf(
-                    resume,
-                    template,
-                    font_choice,
-                    accent_color,
-                    photo
-                )
+                pdf_path = generate_pdf_from_html(html_preview)
 
                 with open(pdf_path, "rb") as f:
                     st.download_button(
