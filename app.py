@@ -215,24 +215,29 @@ elif menu == "Resume Builder":
 
             st.divider()
 
-            # HTML PREVIEW
-            html_preview = bold_corporate_template(resume, accent_color)
-            st.subheader("👀 Live Preview")
-            st.components.v1.html(html_preview, height=800, scrolling=True)
+        
 
-            # PDF GENERATION
-            if st.button("📄 Generate PDF", key="generate_pdf_btn"):
+          
+# HTML PREVIEW
+# -------------------------
+html_preview = bold_corporate_template(resume, accent_color)
 
-                pdf_path = generate_pdf_from_html(html_preview)
+st.subheader("👀 Live Preview")
+st.components.v1.html(html_preview, height=900, scrolling=True)
 
-                with open(pdf_path, "rb") as f:
-                    st.download_button(
-                        "⬇ Download Resume PDF",
-                        f,
-                        file_name="resume.pdf",
-                        mime="application/pdf",
-                        key="download_btn"
-                    )
+st.divider()
+
+# -------------------------
+# DOWNLOAD HTML
+# -------------------------
+st.download_button(
+    label="⬇ Download Resume (HTML)",
+    data=html_preview,
+    file_name="resume.html",
+    mime="text/html"
+)
+
+st.info("After downloading, open the file in your browser → Press Ctrl+P (Cmd+P on Mac) → Save as PDF.")
 
 # -------------------------
 # ATS ANALYZER
