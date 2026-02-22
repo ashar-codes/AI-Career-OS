@@ -2,31 +2,28 @@ import base64
 
 def bold_corporate_template(resume, accent_color, photo):
 
-    # ------------------ PROFILE IMAGE ------------------
     image_html = ""
     if photo:
         image_bytes = photo.read()
         encoded = base64.b64encode(image_bytes).decode()
         image_html = f"""
-        <div class="profile-container">
+        <div class="profile-wrapper">
             <img src="data:image/png;base64,{encoded}" class="profile-pic">
         </div>
         """
 
-    # ------------------ SKILLS ------------------
     skills_html = ""
     for i, skill in enumerate(resume.get("skills", [])[:8]):
-        width = 85 - (i * 5)  # dynamic variation
+        width = 90 - (i * 6)
         skills_html += f"""
         <div class="skill">
             <div class="skill-name">{skill}</div>
             <div class="skill-bar">
-                <div class="skill-fill" style="width:{width}%;"></div>
+                <div class="skill-fill" style="width:{width}%"></div>
             </div>
         </div>
         """
 
-    # ------------------ EXPERIENCE ------------------
     experience_html = ""
     for exp in resume.get("experience", []):
         bullets = "".join([f"<li>{b}</li>" for b in exp.get("bullets", [])])
@@ -34,7 +31,10 @@ def bold_corporate_template(resume, accent_color, photo):
         <div class="timeline-item">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <div class="job-title">{exp.get("title","")} <span class="company">| {exp.get("company","")}</span></div>
+                <div class="job-title">
+                    {exp.get("title","")}
+                    <span class="company">| {exp.get("company","")}</span>
+                </div>
                 <ul>{bullets}</ul>
             </div>
         </div>
@@ -53,28 +53,31 @@ def bold_corporate_template(resume, accent_color, photo):
 
         body {{
             margin: 0;
-            font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
-            background: #ffffff;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #f4f6f8;
             -webkit-font-smoothing: antialiased;
         }}
 
         .page {{
             width: 210mm;
             min-height: 297mm;
+            margin: auto;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
         }}
 
         /* ================= HEADER ================= */
         .header {{
-            background: linear-gradient(90deg, #1f1f1f, #2e2e2e);
+            background: linear-gradient(120deg, #1c1c1c, #2b2b2b);
             color: white;
-            padding: 60px 40px 50px 40px;
+            padding: 70px 40px 60px 40px;
             text-align: center;
             position: relative;
         }}
 
         .header h1 {{
             margin: 0;
-            font-size: 42px;
+            font-size: 44px;
             font-weight: 700;
             letter-spacing: 1px;
         }}
@@ -82,75 +85,76 @@ def bold_corporate_template(resume, accent_color, photo):
         .subtitle {{
             margin-top: 10px;
             font-size: 14px;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             color: #bbbbbb;
         }}
 
-        .divider {{
-            width: 70px;
+        .accent-line {{
+            width: 80px;
             height: 4px;
             background: {accent_color};
-            margin: 22px auto 0;
+            margin: 25px auto 0;
             border-radius: 3px;
+            box-shadow: 0 0 10px {accent_color};
         }}
 
         /* ================= PROFILE ================= */
-        .profile-container {{
+        .profile-wrapper {{
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            bottom: -55px;
+            bottom: -60px;
         }}
 
         .profile-pic {{
-            width: 110px;
-            height: 110px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            border: 5px solid white;
+            border: 6px solid white;
             object-fit: cover;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }}
 
         /* ================= LAYOUT ================= */
         .container {{
             display: flex;
-            margin-top: 70px;
+            margin-top: 90px;
         }}
 
         .sidebar {{
             width: 30%;
-            background: #2f2f2f;
-            color: #f5f5f5;
-            padding: 45px 35px;
+            background: #262626;
+            color: #f1f1f1;
+            padding: 50px 35px;
         }}
 
         .content {{
             width: 70%;
-            padding: 60px 60px;
+            padding: 70px 65px;
             background: #ffffff;
         }}
 
-        /* ================= SECTION HEADERS ================= */
+        /* ================= TYPOGRAPHY ================= */
         h2 {{
-            font-size: 14px;
+            font-size: 13px;
             letter-spacing: 2px;
             text-transform: uppercase;
             font-weight: 600;
             border-bottom: 2px solid {accent_color};
             padding-bottom: 6px;
-            margin-top: 35px;
+            margin-top: 40px;
         }}
 
         p {{
             font-size: 14px;
-            line-height: 1.7;
-            margin-top: 10px;
+            line-height: 1.8;
+            color: #333;
         }}
 
         /* ================= SKILLS ================= */
         .skill {{
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }}
 
         .skill-name {{
@@ -159,7 +163,7 @@ def bold_corporate_template(resume, accent_color, photo):
         }}
 
         .skill-bar {{
-            background: #444;
+            background: #3d3d3d;
             height: 6px;
             border-radius: 6px;
         }}
@@ -168,37 +172,40 @@ def bold_corporate_template(resume, accent_color, photo):
             height: 6px;
             background: {accent_color};
             border-radius: 6px;
+            box-shadow: 0 0 8px {accent_color};
         }}
 
         /* ================= TIMELINE ================= */
         .timeline {{
             position: relative;
-            padding-left: 30px;
+            padding-left: 35px;
         }}
 
         .timeline::before {{
             content: '';
             position: absolute;
-            left: 8px;
+            left: 10px;
             top: 0;
             bottom: 0;
             width: 2px;
             background: {accent_color};
+            opacity: 0.5;
         }}
 
         .timeline-item {{
             position: relative;
-            margin-bottom: 35px;
+            margin-bottom: 40px;
         }}
 
         .timeline-dot {{
             position: absolute;
-            left: -2px;
+            left: 4px;
             top: 6px;
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             background: {accent_color};
             border-radius: 50%;
+            box-shadow: 0 0 8px {accent_color};
         }}
 
         .job-title {{
@@ -219,7 +226,8 @@ def bold_corporate_template(resume, accent_color, photo):
         li {{
             font-size: 14px;
             margin-bottom: 8px;
-            line-height: 1.6;
+            line-height: 1.7;
+            color: #333;
         }}
 
         .education-text {{
@@ -237,20 +245,20 @@ def bold_corporate_template(resume, accent_color, photo):
         <div class="header">
             <h1>{resume.get("name","")}</h1>
             <div class="subtitle">Software Engineer</div>
-            <div class="divider"></div>
+            <div class="accent-line"></div>
             {image_html}
         </div>
 
         <div class="container">
 
             <div class="sidebar">
-                <h2>✉ Contact</h2>
+                <h2>Contact</h2>
                 <p>{resume.get("email","")}</p>
 
-                <h2>⚙ Skills</h2>
+                <h2>Skills</h2>
                 {skills_html}
 
-                <h2>🎓 Education</h2>
+                <h2>Education</h2>
                 <div class="education-text">
                     {resume.get("education","")}
                 </div>
@@ -258,10 +266,10 @@ def bold_corporate_template(resume, accent_color, photo):
 
             <div class="content">
 
-                <h2>🧠 Summary</h2>
+                <h2>Summary</h2>
                 <p>{resume.get("summary","")}</p>
 
-                <h2>💼 Experience</h2>
+                <h2>Experience</h2>
                 <div class="timeline">
                     {experience_html}
                 </div>
