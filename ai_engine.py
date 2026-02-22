@@ -81,7 +81,7 @@ def analyze_resume(text):
     """
 
     response = client.chat.completions.create(
-   model="qwen/qwen3-32b",
+   MODEL = "qwen/qwen3-32b",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
@@ -106,7 +106,7 @@ def analyze_winning_resume(text):
     """
 
     response = client.chat.completions.create(
-        model="qwen/qwen3-32b",
+        MODEL = "qwen/qwen3-32b",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
