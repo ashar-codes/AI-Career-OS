@@ -50,13 +50,24 @@ def register_fonts():
 # -----------------------------
 
 def draw_circular_image(c, image_path, x, y, size):
-    d = Drawing(size, size)
-    circle = Circle(size / 2, size / 2, size / 2)
-    d.add(circle)
-    renderPDF.draw(d, c, x, y)
+
+    # Create circular clipping path
+    path = c.beginPath()
+    path.circle(x + size / 2, y + size / 2, size / 2)
+
     c.saveState()
-    c.clipPath(circle.getPath(), stroke=0)
-    c.drawImage(image_path, x, y, size, size, preserveAspectRatio=True, mask='auto')
+    c.clipPath(path, stroke=0, fill=0)
+
+    c.drawImage(
+        image_path,
+        x,
+        y,
+        width=size,
+        height=size,
+        preserveAspectRatio=True,
+        mask='auto'
+    )
+
     c.restoreState()
 
 
