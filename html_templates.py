@@ -33,8 +33,9 @@ def bold_corporate_template(resume, accent_color):
 
         body {{
             margin: 0;
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
+            background: #ffffff;
         }}
 
         .page {{
@@ -44,24 +45,33 @@ def bold_corporate_template(resume, accent_color):
 
         /* HEADER */
         .header {{
-            background: linear-gradient(90deg, #111111, #1e1e1e);
+            background: linear-gradient(90deg, #2a2a2a, #1f1f1f);
             color: white;
-            padding: 50px 40px;
+            padding: 55px 40px 45px 40px;
             text-align: center;
         }}
 
         .header h1 {{
             margin: 0;
-            font-size: 38px;
-            letter-spacing: 1px;
+            font-size: 40px;
             font-weight: 700;
+            letter-spacing: 1px;
+        }}
+
+        .subtitle {{
+            margin-top: 10px;
+            font-size: 15px;
+            letter-spacing: 2px;
+            color: #cccccc;
+            text-transform: uppercase;
         }}
 
         .divider {{
-            width: 60px;
+            width: 70px;
             height: 4px;
             background: {accent_color};
-            margin: 18px auto 0;
+            margin: 22px auto 0;
+            border-radius: 4px;
         }}
 
         /* MAIN LAYOUT */
@@ -70,33 +80,34 @@ def bold_corporate_template(resume, accent_color):
         }}
 
         .sidebar {{
-            width: 32%;
-            background: #151515;
-            color: white;
-            padding: 40px 30px;
+            width: 30%;
+            background: #2f2f2f;
+            color: #f0f0f0;
+            padding: 45px 35px;
         }}
 
         .content {{
-            width: 68%;
-            background: #f7f7f7;
-            padding: 50px 45px;
+            width: 70%;
+            background: #ffffff;
+            padding: 55px 50px;
         }}
 
         /* SECTION HEADERS */
         h2 {{
-            font-size: 16px;
+            font-size: 15px;
             letter-spacing: 2px;
             font-weight: 600;
             text-transform: uppercase;
             border-bottom: 2px solid {accent_color};
             padding-bottom: 6px;
-            margin-top: 30px;
+            margin-top: 35px;
         }}
 
         /* TEXT */
         p {{
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.7;
+            margin-top: 10px;
         }}
 
         ul {{
@@ -106,15 +117,15 @@ def bold_corporate_template(resume, accent_color):
 
         li {{
             font-size: 14px;
-            margin-bottom: 6px;
-            line-height: 1.5;
+            margin-bottom: 8px;
+            line-height: 1.6;
         }}
 
         /* JOB TITLE */
         .job-title {{
             font-weight: 600;
             font-size: 15px;
-            margin-top: 18px;
+            margin-top: 25px;
         }}
 
         .company {{
@@ -124,7 +135,7 @@ def bold_corporate_template(resume, accent_color):
 
         /* SKILLS */
         .skill {{
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }}
 
         .skill-name {{
@@ -133,20 +144,23 @@ def bold_corporate_template(resume, accent_color):
         }}
 
         .skill-bar {{
-            background: #333;
-            height: 4px;
+            background: #444;
+            height: 5px;
+            border-radius: 6px;
         }}
 
         .skill-fill {{
             width: 70%;
-            height: 4px;
+            height: 5px;
             background: {accent_color};
+            border-radius: 6px;
         }}
 
         /* EDUCATION */
         .education-text {{
             font-size: 13px;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin-top: 10px;
         }}
 
     </style>
@@ -157,6 +171,7 @@ def bold_corporate_template(resume, accent_color):
 
         <div class="header">
             <h1>{resume.get("name","")}</h1>
+            <div class="subtitle">Junior Software Engineer</div>
             <div class="divider"></div>
         </div>
 
