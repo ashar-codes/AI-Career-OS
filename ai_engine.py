@@ -5,17 +5,39 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 MODEL = "openai/gpt-oss-120b"
 
-MODEL = "openai/gpt-oss-120b"
-
 def generate_resume(data):
 
     prompt = f"""
-Create a professional ATS-optimized resume.
+You are a professional resume writer.
 
-Output ONLY the final resume.
-Do NOT include explanations.
-Do NOT include reasoning.
-Start directly with the candidate name.
+Generate a resume in STRICT JSON format.
+
+Return ONLY valid JSON.
+No explanation.
+No markdown.
+No extra text.
+
+Format exactly like this:
+
+{{
+  "summary": "",
+  "education": "",
+  "skills": [],
+  "experience": [
+    {{
+      "title": "",
+      "company": "",
+      "duration": "",
+      "bullets": []
+    }}
+  ],
+  "projects": [
+    {{
+      "title": "",
+      "bullets": []
+    }}
+  ]
+}}
 
 Candidate Information:
 Name: {data['name']}
@@ -30,8 +52,8 @@ Job Description: {data['job_description']}
     response = client.chat.completions.create(
         model=MODEL,
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
-        max_tokens=1200
+        temperature=0.2,
+        max_tokens=1500
     )
 
     return response.choices[0].message.content.strip()
