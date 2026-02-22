@@ -38,7 +38,9 @@ def bold_corporate_template(resume, accent_color, photo):
                     {exp.get("title","")}
                     <span class="company">| {exp.get("company","")}</span>
                 </div>
-                <ul>{bullets}</ul>
+                <ul class="bullet-list">
+                    {bullets}
+                </ul>
             </div>
         </div>
         """
@@ -70,6 +72,7 @@ def bold_corporate_template(resume, accent_color, photo):
         }}
 
         /* ================= HEADER ================= */
+
         .header {{
             background: linear-gradient(120deg, #1c1c1c, #2b2b2b);
             color: white;
@@ -103,6 +106,7 @@ def bold_corporate_template(resume, accent_color, photo):
         }}
 
         /* ================= PROFILE ================= */
+
         .profile-wrapper {{
             position: absolute;
             left: 50%;
@@ -120,9 +124,10 @@ def bold_corporate_template(resume, accent_color, photo):
         }}
 
         /* ================= LAYOUT ================= */
+
         .container {{
             display: flex;
-            margin-top: 90px;
+            margin-top: 100px;
         }}
 
         .sidebar {{
@@ -140,6 +145,7 @@ def bold_corporate_template(resume, accent_color, photo):
         }}
 
         /* ================= TYPOGRAPHY ================= */
+
         h2 {{
             font-size: 13px;
             letter-spacing: 2px;
@@ -163,6 +169,7 @@ def bold_corporate_template(resume, accent_color, photo):
         }}
 
         /* ================= SKILLS ================= */
+
         .skill {{
             margin-bottom: 20px;
         }}
@@ -185,56 +192,61 @@ def bold_corporate_template(resume, accent_color, photo):
             box-shadow: 0 0 8px {accent_color};
         }}
 
-      /* ================= TIMELINE ================= */
+        /* ================= TIMELINE ================= */
 
-.timeline {
-    position: relative;
-    padding-left: 60px; /* more breathing room */
-}
+        .timeline {{
+            position: relative;
+            padding-left: 70px;   /* STRUCTURAL FIX */
+        }}
 
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 28px;              /* line center */
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: {accent_color};
-    opacity: 0.5;
-}
+        .timeline::before {{
+            content: '';
+            position: absolute;
+            left: 32px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: {accent_color};
+            opacity: 0.5;
+        }}
 
-.timeline-item {
-    position: relative;
-    margin-bottom: 45px;
-}
+        .timeline-item {{
+            position: relative;
+            margin-bottom: 45px;
+        }}
 
-.timeline-dot {
-    position: absolute;
-    left: 23px;              /* 28 - (10/2) = perfectly centered */
-    top: 10px;
-    width: 10px;
-    height: 10px;
-    background: {accent_color};
-    border-radius: 50%;
-    box-shadow: 0 0 6px {accent_color};
-}
+        .timeline-dot {{
+            position: absolute;
+            left: 27px;  /* perfectly centered */
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            background: {accent_color};
+            border-radius: 50%;
+            box-shadow: 0 0 6px {accent_color};
+        }}
 
-.timeline-content {
-    margin-left: 0;          /* reset */
-}
+        .timeline-content {{
+            margin-left: 0;
+        }}
 
-.job-title {
-    font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 10px;     /* CRITICAL spacing fix */
-}
+        .job-title {{
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }}
 
-ul {
-    margin-top: 0;
-    padding-left: 20px;      /* proper bullet indentation */
-}
+        .company {{
+            color: {accent_color};
+            font-weight: 500;
+        }}
 
-        li {{
+        .bullet-list {{
+            margin: 0;
+            padding-left: 22px;
+        }}
+
+        .bullet-list li {{
             font-size: 14px;
             margin-bottom: 8px;
             line-height: 1.7;
