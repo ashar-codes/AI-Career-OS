@@ -2,6 +2,7 @@ import base64
 
 def bold_corporate_template(resume, accent_color, photo):
 
+    # ---------------- PROFILE IMAGE ----------------
     image_html = ""
     if photo:
         image_bytes = photo.read()
@@ -12,6 +13,7 @@ def bold_corporate_template(resume, accent_color, photo):
         </div>
         """
 
+    # ---------------- SKILLS ----------------
     skills_html = ""
     for i, skill in enumerate(resume.get("skills", [])[:8]):
         width = 90 - (i * 6)
@@ -24,6 +26,7 @@ def bold_corporate_template(resume, accent_color, photo):
         </div>
         """
 
+    # ---------------- EXPERIENCE ----------------
     experience_html = ""
     for exp in resume.get("experience", []):
         bullets = "".join([f"<li>{b}</li>" for b in exp.get("bullets", [])])
@@ -40,7 +43,7 @@ def bold_corporate_template(resume, accent_color, photo):
         </div>
         """
 
-    html = f"""
+    return f"""
     <html>
     <head>
     <meta charset="UTF-8">
@@ -125,8 +128,9 @@ def bold_corporate_template(resume, accent_color, photo):
         .sidebar {{
             width: 30%;
             background: #262626;
-            color: #f1f1f1;
+            color: #ffffff;
             padding: 50px 35px;
+            box-shadow: inset -1px 0 0 rgba(255,255,255,0.05);
         }}
 
         .content {{
@@ -150,6 +154,12 @@ def bold_corporate_template(resume, accent_color, photo):
             font-size: 14px;
             line-height: 1.8;
             color: #333;
+        }}
+
+        .sidebar p {{
+            color: #ffffff;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }}
 
         /* ================= SKILLS ================= */
@@ -178,13 +188,13 @@ def bold_corporate_template(resume, accent_color, photo):
         /* ================= TIMELINE ================= */
         .timeline {{
             position: relative;
-            padding-left: 35px;
+            padding-left: 45px;
         }}
 
         .timeline::before {{
             content: '';
             position: absolute;
-            left: 10px;
+            left: 20px;
             top: 0;
             bottom: 0;
             width: 2px;
@@ -199,13 +209,13 @@ def bold_corporate_template(resume, accent_color, photo):
 
         .timeline-dot {{
             position: absolute;
-            left: 4px;
-            top: 6px;
+            left: 15px;   /* perfectly centered */
+            top: 8px;
             width: 10px;
             height: 10px;
             background: {accent_color};
             border-radius: 50%;
-            box-shadow: 0 0 8px {accent_color};
+            box-shadow: 0 0 6px {accent_color};
         }}
 
         .job-title {{
@@ -282,5 +292,3 @@ def bold_corporate_template(resume, accent_color, photo):
     </body>
     </html>
     """
-
-    return html
