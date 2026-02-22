@@ -1,3 +1,4 @@
+from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
@@ -49,9 +50,10 @@ def register_fonts():
 # CIRCULAR IMAGE MASK
 # -----------------------------
 
-def draw_circular_image(c, image_path, x, y, size):
+def draw_circular_image(c, uploaded_file, x, y, size):
 
-    # Create circular clipping path
+    image = ImageReader(uploaded_file)
+
     path = c.beginPath()
     path.circle(x + size / 2, y + size / 2, size / 2)
 
@@ -59,7 +61,7 @@ def draw_circular_image(c, image_path, x, y, size):
     c.clipPath(path, stroke=0, fill=0)
 
     c.drawImage(
-        image_path,
+        image,
         x,
         y,
         width=size,
